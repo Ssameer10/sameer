@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sameer Sapkota | Designer • Coder • Student</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        neonCyan: '#00f3ff',
+                        neonPink: '#ff007f',
+                        neonGold: '#ffd700',
+                        darkBg: '#090b10',
+                        cardBg: 'rgba(17, 24, 39, 0.7)',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                        'spin-reverse': 'spin-reverse 15s linear infinite',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        'spin-reverse': {
+                            '0%': { transform: 'rotate(360deg)' },
+                            '100%': { transform: 'rotate(0deg)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="relative min-h-screen selection:bg-neonCyan selection:text-black">
+
+    <!-- Canvas Particle Background -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- Ambient Glowing Orbs -->
+    <div class="fixed top-1/4 left-10 w-96 h-96 bg-glow-1 pointer-events-none z-0 animate-pulse-glow"></div>
+    <div class="fixed bottom-1/4 right-10 w-[30rem] h-[30rem] bg-glow-2 pointer-events-none z-0 animate-pulse-glow" style="animation-delay: 1.5s;"></div>
+    <div class="fixed top-2/3 left-1/3 w-80 h-80 bg-glow-3 pointer-events-none z-0 animate-pulse-glow" style="animation-delay: 2.5s;"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-gray-900 border border-neonCyan text-neonCyan px-6 py-4 rounded-xl shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 backdrop-blur-md">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toastMsg" class="font-medium">Notification message</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 left-0 right-0 z-40 px-4 py-4 backdrop-blur-md bg-darkBg/70 border-b border-gray-800/80">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="text-xl font-extrabold font-heading tracking-wider text-white flex items-center gap-2 group">
+                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-neonCyan to-neonPink flex items-center justify-center text-black font-black text-sm group-hover:scale-105 transition-transform">SS</span>
+                <span class="group-hover:text-neonCyan transition-colors">SAMEER</span>
+            </a>
+
+            <!-- Desktop Nav Menu -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#about" class="text-gray-300 hover:text-neonCyan transition-colors py-1">About</a>
+                <a href="#skills" class="text-gray-300 hover:text-neonCyan transition-colors py-1">Skills</a>
+                <a href="#projects" class="text-gray-300 hover:text-neonCyan transition-colors py-1">Projects</a>
+                <a href="#game" class="text-gray-300 hover:text-neonCyan transition-colors py-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-gamepad text-neonPink"></i> Play
+                </a>
+                <a href="#journey" class="text-gray-300 hover:text-neonCyan transition-colors py-1">Journey</a>
+                <a href="#contact" class="px-4 py-2 rounded-lg bg-transparent border border-neonCyan text-neonCyan hover:bg-neonCyan hover:text-black transition-all font-semibold shadow-[0_0_15px_rgba(0,243,255,0.2)]">Get in Touch</a>
+            </nav>
+
+            <!-- Mobile Hamburger Button -->
+            <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="md:hidden text-gray-300 hover:text-neonCyan text-2xl p-2 focus:outline-none">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden md:hidden absolute top-full left-0 right-0 bg-gray-900/95 border-b border-neonCyan/30 backdrop-blur-xl px-6 py-6 transition-all">
+            <div class="flex flex-col gap-4 font-medium text-base">
+                <a href="#about" class="mobile-link text-gray-300 hover:text-neonCyan py-2 border-b border-gray-800">About</a>
+                <a href="#skills" class="mobile-link text-gray-300 hover:text-neonCyan py-2 border-b border-gray-800">Skills</a>
+                <a href="#projects" class="mobile-link text-gray-300 hover:text-neonCyan py-2 border-b border-gray-800">Projects</a>
+                <a href="#game" class="mobile-link text-gray-300 hover:text-neonCyan py-2 border-b border-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-neonPink"></i> Play Game
+                </a>
+                <a href="#journey" class="mobile-link text-gray-300 hover:text-neonCyan py-2 border-b border-gray-800">Journey</a>
+                <a href="#contact" class="mobile-link mt-2 text-center py-3 rounded-xl bg-gradient-to-r from-neonCyan to-blue-600 text-black font-bold">Contact Me</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="relative z-10 pt-24 space-y-32">
+
+        <!-- HERO SECTION -->
+        <section id="hero" class="min-h-[85vh] flex flex-col items-center justify-center px-4 pt-8 pb-16 text-center max-w-4xl mx-auto relative">
+
+            <!-- Profile Ring Avatar with Orbiting Badges -->
+            <div class="relative mb-10 w-48 h-48 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full avatar-ring animate-spin-slow opacity-80 blur-[2px]"></div>
+                
+                <div class="relative w-44 h-44 rounded-full bg-gray-950 border-2 border-darkBg overflow-hidden flex items-center justify-center shadow-2xl z-10">
+                    <img id="avatarImg" src="" alt="Sameer Sapkota" class="hidden w-full h-full object-cover" onerror="this.classList.add('hidden'); document.getElementById('avatarMonogram').classList.remove('hidden');">
+                    <div id="avatarMonogram" class="flex flex-col items-center justify-center">
+                        <span class="text-5xl font-extrabold font-heading tracking-widest text-transparent bg-clip-text bg-gradient-to-tr from-neonCyan via-white to-neonGold drop-shadow-md">SS</span>
+                        <span class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-mono">Portfolio</span>
+                    </div>
+                </div>
+
+                <div id="orbitContainer" class="absolute inset-0 pointer-events-none z-20">
+                    <div class="orbit-chip absolute w-10 h-10 rounded-full bg-gray-900 border border-neonPink text-neonPink flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(255,0,127,0.3)]">
+                        HTML
+                    </div>
+                    <div class="orbit-chip absolute w-10 h-10 rounded-full bg-gray-900 border border-neonCyan text-neonCyan flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(0,243,255,0.3)]">
+                        CSS
+                    </div>
+                    <div class="orbit-chip absolute w-10 h-10 rounded-full bg-gray-900 border border-neonGold text-neonGold flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(255,215,0,0.3)]">
+                        JS
+                    </div>
+                </div>
+            </div>
+
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-900/80 border border-neonCyan/40 text-neonCyan text-sm font-medium mb-6 shadow-[0_0_15px_rgba(0,243,255,0.1)]">
+                <span class="w-2 h-2 rounded-full bg-neonCyan animate-ping"></span>
+                <span>Hello, I'm</span>
+            </div>
+
+            <h1 class="text-4xl md:text-7xl font-extrabold font-heading tracking-tight mb-4 title-sheen">
+                Sameer Sapkota
+            </h1>
+
+            <p class="text-xl md:text-2xl font-medium text-gray-300 mb-8 flex items-center justify-center gap-3">
+                <span class="hover:text-neonCyan transition-colors">Designer</span>
+                <span class="text-neonPink font-bold">•</span>
+                <span class="hover:text-neonGold transition-colors">Coder</span>
+                <span class="text-neonCyan font-bold">•</span>
+                <span class="hover:text-neonPink transition-colors">Student</span>
+            </p>
+
+            <p class="text-gray-400 max-w-xl text-base md:text-lg mb-10 leading-relaxed">
+                Class 11 student at Diamond Secondary School. I design and code clean, modern websites.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-5">
+                <a href="#projects" class="magnetic-btn px-8 py-4 rounded-xl bg-gradient-to-r from-neonCyan to-blue-600 text-black font-bold text-base shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:shadow-[0_0_30px_rgba(0,243,255,0.6)] transition-all transform hover:-translate-y-1">
+                    Explore Projects <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                </a>
+                <a href="#contact" class="magnetic-btn px-8 py-4 rounded-xl bg-gray-900 border border-neonGold text-neonGold font-bold text-base hover:bg-neonGold hover:text-black transition-all shadow-[0_0_15px_rgba(255,215,0,0.15)] transform hover:-translate-y-1">
+                    Get In Touch
+                </a>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="about" class="max-w-5xl mx-auto px-6 py-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
+                    About <span class="text-neonCyan">Me</span>
+                </h2>
+                <div class="w-16 h-1 bg-neonCyan mx-auto rounded-full shadow-[0_0_10px_#00f3ff]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="tilt-card bg-gray-900/60 border border-gray-800 rounded-2xl p-8 backdrop-blur-md hover:border-neonCyan/50 transition-all">
+                    <div class="w-12 h-12 rounded-xl bg-neonCyan/10 border border-neonCyan/30 text-neonCyan flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold font-heading text-white mb-4">Who I Am</h3>
+                    <p class="text-gray-300 leading-relaxed mb-4">
+                        I’m Sameer, a Class 11 student who loves making things for the web.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed">
+                        I like tidy layouts, smooth motion, and code that’s easy to read. I’m learning something new every week and building as I go.
+                    </p>
+                </div>
+
+                <div class="tilt-card bg-gray-900/60 border border-gray-800 rounded-2xl p-8 backdrop-blur-md hover:border-neonPink/50 transition-all">
+                    <div class="w-12 h-12 rounded-xl bg-neonPink/10 border border-neonPink/30 text-neonPink flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold font-heading text-white mb-4">My Goal</h3>
+                    <p class="text-gray-300 leading-relaxed mb-4">
+                        To build web experiences that are not only visual achievements but also lightning-fast, accessible, and intuitive to use.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="p-3 rounded-lg bg-gray-950/80 border border-gray-800">
+                            <span class="block text-neonCyan font-bold text-xl">100%</span>
+                            <span class="text-xs text-gray-400 uppercase tracking-wider">Dedication</span>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-950/80 border border-gray-800">
+                            <span class="block text-neonGold font-bold text-xl">Clean</span>
+                            <span class="text-xs text-gray-400 uppercase tracking-wider">Code Structure</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS / WHAT I DO SECTION -->
+        <section id="skills" class="max-w-5xl mx-auto px-6 py-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
+                    What I <span class="text-neonGold">Do</span>
+                </h2>
+                <p class="text-gray-400 text-sm md:text-base">Here are the things I enjoy doing</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Skill 1 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800/80 hover:border-neonCyan rounded-2xl p-6 transition-all shadow-lg group">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-950/40 border border-neonCyan/40 text-neonCyan flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonCyan transition-colors">Making Websites</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        I make websites with HTML, CSS and a little JavaScript. I try to keep my code neat and easy to read.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">HTML5</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">CSS3</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">JavaScript</span>
+                    </div>
+                </div>
+
+                <!-- Skill 2 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800/80 hover:border-neonPink rounded-2xl p-6 transition-all shadow-lg group">
+                    <div class="w-14 h-14 rounded-2xl bg-pink-950/40 border border-neonPink/40 text-neonPink flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-palette"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonPink transition-colors">Designing Pages</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        I like to design pages that look clean and are easy to read, with dark colors and a bit of neon glow.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Colors</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Layouts</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Fonts</span>
+                    </div>
+                </div>
+
+                <!-- Skill 3 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800/80 hover:border-neonGold rounded-2xl p-6 transition-all shadow-lg group">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-950/40 border border-neonGold/40 text-neonGold flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonGold transition-colors">Small Games</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+                        I enjoy making small games and fun things that people can click, move and play with on a page.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Games</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Animation</span>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-gray-950 border border-gray-800 text-gray-300">Canvas</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CODE CATCHER GAME SECTION -->
+        <section id="game" class="max-w-4xl mx-auto px-6 py-8">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neonPink/10 border border-neonPink/40 text-neonPink text-xs font-semibold mb-3">
+                    <i class="fa-solid fa-gamepad"></i> MINI-GAME BREAK
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold font-heading text-white tracking-tight mb-2">
+                    Code <span class="text-neonCyan">Catcher</span>
+                </h2>
+                <p class="text-gray-400 text-sm">
+                    Catch falling cyan <code class="text-neonCyan">&lt;/&gt;</code> code snippets with your bar! Avoid the pink <i class="fa-solid fa-bug text-neonPink"></i> bugs.
+                </p>
+            </div>
+
+            <div class="relative bg-gray-950 border-2 border-neonCyan/50 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,243,255,0.15)] p-4">
+                <div class="flex items-center justify-between mb-4 px-2 py-2 bg-gray-900/80 rounded-xl border border-gray-800 text-sm">
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <span class="text-gray-400 text-xs">Score:</span>
+                            <span id="gameScore" class="font-bold text-neonCyan text-lg ml-1">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 text-xs">High:</span>
+                            <span id="gameHighScore" class="font-bold text-neonGold text-lg ml-1">0</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="text-gray-400 text-xs mr-1">Lives:</span>
+                        <div id="gameLives" class="flex gap-1 text-neonPink text-sm">
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                            <i class="fa-solid fa-heart"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative w-full aspect-[16/9] max-h-[380px] bg-darkBg rounded-xl overflow-hidden border border-gray-800">
+                    <canvas id="gameCanvas" class="w-full h-full block cursor-none"></canvas>
+
+                    <div id="gameOverlay" class="absolute inset-0 bg-darkBg/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10 transition-opacity">
+                        <h3 id="overlayTitle" class="text-3xl font-extrabold font-heading text-white mb-2">Code Catcher</h3>
+                        <p id="overlayDesc" class="text-gray-400 text-sm max-w-md mb-6">
+                            Use your <span class="text-neonCyan">Mouse</span>, <span class="text-neonCyan">Touch Drag</span>, or <span class="text-neonCyan">Arrow Keys / A-D</span> to catch code snippets!
+                        </p>
+                        <button id="startGameBtn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-neonCyan to-blue-600 text-black font-bold hover:scale-105 transition-transform shadow-[0_0_20px_rgba(0,243,255,0.4)]">
+                            Start Game <i class="fa-solid fa-play ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3 text-xs text-gray-500">
+                    Controls: Move mouse, drag touch, or use Arrow Left/Right to slide the paddle.
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION -->
+        <section id="projects" class="max-w-5xl mx-auto px-6 py-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
+                    Featured <span class="text-neonCyan">Projects</span>
+                </h2>
+                <p class="text-gray-400 text-sm">I have only made this portfolio so far. More projects are coming soon.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800 rounded-2xl overflow-hidden hover:border-neonCyan transition-all shadow-xl flex flex-col justify-between group">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-mono px-2.5 py-1 rounded bg-neonCyan/10 text-neonCyan border border-neonCyan/30">Website</span>
+                            <i class="fa-solid fa-laptop-code text-gray-500 text-xl group-hover:text-neonCyan transition-colors"></i>
+                        </div>
+                        <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonCyan transition-colors">My Portfolio</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                            This is the website you are on right now. I made it myself with HTML, CSS and JavaScript.
+                        </p>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-800/80">
+                            <span class="text-[11px] text-gray-400">HTML5</span>
+                            <span class="text-[11px] text-gray-400">•</span>
+                            <span class="text-[11px] text-gray-400">Tailwind</span>
+                            <span class="text-[11px] text-gray-400">•</span>
+                            <span class="text-[11px] text-gray-400">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800 rounded-2xl overflow-hidden hover:border-neonPink transition-all shadow-xl flex flex-col justify-between group">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-mono px-2.5 py-1 rounded bg-neonPink/10 text-neonPink border border-neonPink/30">Soon</span>
+                            <i class="fa-solid fa-hourglass-half text-neonPink text-xl animate-pulse"></i>
+                        </div>
+                        <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonPink transition-colors">Coming Soon</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                            I am working on something new. Please check back soon.
+                        </p>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-800/80">
+                            <span class="text-[11px] text-gray-400">Coming soon</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="tilt-card bg-gray-900/70 border border-gray-800 rounded-2xl overflow-hidden hover:border-neonGold transition-all shadow-xl flex flex-col justify-between group">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-mono px-2.5 py-1 rounded bg-neonGold/10 text-neonGold border border-neonGold/30">Soon</span>
+                            <i class="fa-solid fa-hourglass-half text-neonGold text-xl animate-pulse"></i>
+                        </div>
+                        <h3 class="text-xl font-bold font-heading text-white mb-2 group-hover:text-neonGold transition-colors">Coming Soon</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                            Another project is on the way. Stay tuned!
+                        </p>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-800/80">
+                            <span class="text-[11px] text-gray-400">Coming soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- JOURNEY / TIMELINE SECTION -->
+        <section id="journey" class="max-w-4xl mx-auto px-6 py-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
+                    My <span class="text-neonGold">Journey</span>
+                </h2>
+                <p class="text-gray-400 text-sm">A short story of how I started</p>
+            </div>
+
+            <div class="relative border-l-2 border-gray-800 left-4 md:left-1/2 -translate-x-1/2 space-y-12">
+                <!-- Step 1 -->
+                <div class="relative flex flex-col md:flex-row items-center group">
+                    <div class="absolute -left-[17px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-darkBg border-2 border-neonCyan text-neonCyan font-bold text-xs flex items-center justify-center shadow-[0_0_10px_#00f3ff]">1</div>
+                    <div class="ml-10 md:ml-0 md:w-1/2 md:pr-12 md:text-right">
+                        <span class="text-xs font-mono text-neonCyan font-bold uppercase tracking-wider">The start</span>
+                        <h3 class="text-xl font-bold text-white font-heading mt-1">I found coding</h3>
+                        <p class="text-gray-400 text-sm mt-2">I got curious about how websites are made, so I started learning HTML and CSS.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative flex flex-col md:flex-row items-center group">
+                    <div class="absolute -left-[17px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-darkBg border-2 border-neonPink text-neonPink font-bold text-xs flex items-center justify-center shadow-[0_0_10px_#ff007f]">2</div>
+                    <div class="ml-10 md:ml-0 md:w-1/2 md:pl-12 md:ml-auto text-left">
+                        <span class="text-xs font-mono text-neonPink font-bold uppercase tracking-wider">Right now</span>
+                        <h3 class="text-xl font-bold text-white font-heading mt-1">I am learning JavaScript</h3>
+                        <p class="text-gray-400 text-sm mt-2">I practice a little every day and make small projects, like this portfolio.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative flex flex-col md:flex-row items-center group">
+                    <div class="absolute -left-[17px] md:left-1/2 md:-translate-x-1/2 w-8 h-8 rounded-full bg-darkBg border-2 border-neonGold text-neonGold font-bold text-xs flex items-center justify-center shadow-[0_0_10px_#ffd700]">3</div>
+                    <div class="ml-10 md:ml-0 md:w-1/2 md:pr-12 md:text-right">
+                        <span class="text-xs font-mono text-neonGold font-bold uppercase tracking-wider">Next</span>
+                        <h3 class="text-xl font-bold text-white font-heading mt-1">Making more projects</h3>
+                        <p class="text-gray-400 text-sm mt-2">I want to build more websites and keep getting better.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section id="contact" class="max-w-4xl mx-auto px-6 py-8">
+            <div class="bg-gradient-to-b from-gray-900/90 to-darkBg border border-gray-800 hover:border-neonCyan/40 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden backdrop-blur-xl shadow-2xl transition-all">
+                <div class="w-16 h-16 rounded-2xl bg-neonCyan/10 border border-neonCyan/30 text-neonCyan flex items-center justify-center text-2xl mx-auto mb-6">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+
+                <h2 class="text-3xl md:text-5xl font-extrabold font-heading text-white tracking-tight mb-4">
+                    Let's Build Something <span class="text-neonCyan">Awesome</span>
+                </h2>
+                <p class="text-gray-300 max-w-lg mx-auto text-base mb-8 leading-relaxed">
+                    Have a project in mind, feedback on my work, or just want to say hi? Feel free to reach out directly via email or social channels!
+                </p>
+
+                <div class="inline-flex flex-wrap items-center justify-center gap-3 bg-gray-950/90 border border-neonCyan/30 px-6 py-4 rounded-2xl mb-8 shadow-inner">
+                    <i class="fa-solid fa-envelope text-neonCyan text-lg"></i>
+                    <span class="text-white font-mono text-base md:text-lg font-medium select-all">sapkota.sameer11@gmail.com</span>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-4">
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=sapkota.sameer11@gmail.com&su=Hello%20Sameer" target="_blank" rel="noopener noreferrer" class="px-6 py-3.5 rounded-xl bg-neonCyan text-black font-bold flex items-center gap-2 hover:bg-cyan-300 transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)]">
+                        <i class="fa-solid fa-envelope-open-text"></i> Open Gmail
+                    </a>
+                    <button id="copyEmailBtn" class="px-6 py-3.5 rounded-xl bg-gray-900 border border-neonGold text-neonGold font-bold flex items-center gap-2 hover:bg-neonGold hover:text-black transition-all">
+                        <i class="fa-solid fa-copy"></i> Copy Email
+                    </button>
+                    <button id="shareBtn" class="px-6 py-3.5 rounded-xl bg-gray-900 border border-neonPink text-neonPink font-bold flex items-center gap-2 hover:bg-neonPink hover:text-black transition-all">
+                        <i class="fa-solid fa-share-nodes"></i> Share Portfolio
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 border-t border-gray-800/80 py-10 px-6 text-center text-sm text-gray-500">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                © 2026 <span class="text-gray-300 font-semibold">Sameer Sapkota</span>. Crafted with passion.
+            </div>
+            <div class="flex items-center gap-6 text-lg">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=sapkota.sameer11@gmail.com&su=Hello%20Sameer" target="_blank" class="hover:text-neonCyan transition-colors" title="Email"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://instagram.com/sameer.sapkota10" class="hover:text-neonPink transition-colors" title="Instagram" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-neonCyan transition-colors" title="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
